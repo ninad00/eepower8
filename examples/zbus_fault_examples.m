@@ -11,6 +11,7 @@ function zbus_fault_examples()
 %   intermediate values), so each check uses a tolerance that matches the
 %   rounding on the slide. Exact values are always printed as well.
 
+addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'core'));   % Z-bus engine
 npass = 0; nfail = 0;
 a = exp(2j * pi / 3);
 A = [1 1 1; 1 a^2 a; 1 a a^2];          % [Va; Vb; Vc] = A * [V0; V1; V2]

@@ -1,4 +1,4 @@
-
+﻿
 === Example A (14 Oct, Sequence components): symmetrical components ===
   Va = 110 /_ 0, Vb = 88 /_ -100, Vc = 80 /_ 175 kV  ->
      V0 = 27.0315 /_ 280.68 deg kV

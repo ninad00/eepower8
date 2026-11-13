@@ -17,6 +17,8 @@ function zbus_portal(cmdFile)
 %   Bus 0 is the reference (ground) bus.  Impedances may be complex,
 %   e.g. 0.25j, 0.02+0.08j, 1i*0.1.
 
+addpath(fullfile(fileparts(mfilename('fullpath')), 'core'));   % Z-bus engine
+
 if nargin < 1
     read_line('', {});                       % interactive: read the keyboard
 else

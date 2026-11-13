@@ -6,23 +6,28 @@ change each one is, updates the Z-bus and prints the new matrix.
 
 Plain MATLAB, no toolboxes needed (tested in MATLAB R2026b).
 
-## Files
+## Folders
 
-| File | Purpose |
-|------|---------|
-| `zbus_portal.m`   | **Main program**: interactive portal (run this) |
-| `zbus_modify.m`   | Engine: one topology change, with the type found automatically |
-| `zbus_build.m`    | Builds the Z-bus from branch data with the building algorithm |
-| `zbus_show.m`     | Prints the matrix with bus numbers (in column blocks for large N) |
-| `zbus_branches.m` | Prints the branch list |
-| `zbus_verify.m`   | Checks the Z-bus against `inv(Ybus)` |
-| `zfmt.m`          | Formats an impedance as text |
-| `zbus_demo.m`     | Self-test: every kind of change, plus 300 random changes on 60-bus systems |
-| `zbus_fault_examples.m` | Fault-analysis lecture examples (9–23 Oct), solved with the Z-bus program and checked against the slides (separate from the portal) |
-| `fault_examples_output.txt` | Output of `zbus_fault_examples` (90 checks passed, 0 failed) |
-| `example_commands.txt` | A recorded session: answers and commands, one per line |
-| `sample_run.txt`  | Output of `zbus_portal('example_commands.txt')` |
-| `selftest_output.txt` | Output of `zbus_demo` (25 checks passed, 0 failed) |
+```
+eeass/
+├── zbus_portal.m              main program: interactive Z-bus portal (run this)
+├── core/                      Z-bus engine used by the portal and the examples
+│   ├── zbus_modify.m          one topology change, with the type found automatically
+│   ├── zbus_build.m           builds the Z-bus from branch data
+│   ├── zbus_show.m            prints the matrix with bus numbers
+│   ├── zbus_branches.m        prints the branch list
+│   ├── zbus_verify.m          checks the Z-bus against inv(Ybus)
+│   └── zfmt.m                 formats an impedance as text
+├── examples/
+│   ├── zbus_fault_examples.m  fault-analysis lecture examples, checked against the slides
+│   └── example_commands.txt   a recorded portal session (answers and commands, one per line)
+└── outputs/
+    ├── sample_run.txt               output of zbus_portal('examples/example_commands.txt')
+    └── fault_examples_output.txt    output of zbus_fault_examples (90 checks passed)
+```
+
+`zbus_portal` and `zbus_fault_examples` add `core/` to the MATLAB path themselves, so
+you only need to `cd` to the folder you're running from.
 
 ## How to run
 
@@ -53,10 +58,10 @@ Plain MATLAB, no toolboxes needed (tested in MATLAB R2026b).
 
 Impedances can be complex, for example `0.25j` or `0.02+0.08j`.
 
-**Replaying a command file.** `zbus_portal('example_commands.txt')` reads the answers
+**Replaying a command file.** `zbus_portal('examples/example_commands.txt')` reads the answers
 and commands from a file, one per line, and prints the session. This is useful for a
 large system, and it also works from the command line:
-`matlab -batch "zbus_portal('example_commands.txt')"`.
+`matlab -batch "zbus_portal('examples/example_commands.txt')"`.
 
 ## How each change is identified and applied
 
@@ -86,18 +91,10 @@ remove or change a branch.
 
 Branches are assumed to have no mutual coupling.
 
-## Self-test
-
-```matlab
->> zbus_demo
-```
-
-This builds the example, applies every type of change and checks each result
-against `inv(Ybus)`. It then runs 300 random changes on random 60-bus networks.
-
 ## Fault-analysis examples (separate from the portal)
 
 ```matlab
+>> cd C:\eeass\examples
 >> zbus_fault_examples
 ```
 
