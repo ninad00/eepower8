@@ -1,0 +1,82 @@
+﻿
+=== 1. Build the Z-bus of a 4-bus system from branch data ===
+  Branch 1 (ref-1): Type 1: new bus 1 connected to the reference through Zb = j0.2.
+  Branch 2 (ref-4): Type 1: new bus 4 connected to the reference through Zb = j0.25.
+  Branch 3 (1-2): Type 2: new bus 2 connected to existing bus 1 through Zb = j0.1.
+  Branch 4 (1-3): Type 2: new bus 3 connected to existing bus 1 through Zb = j0.15.
+  Branch 5 (2-3): Type 4: branch Zb = j0.2 added between existing buses 2 and 3.
+  Branch 6 (3-4): Type 4: branch Zb = j0.1 added between existing buses 3 and 4.
+  Branch 7 (2-4): Type 4: branch Zb = j0.25 added between existing buses 2 and 4.
+
+Z-bus matrix  (4 x 4)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4
+-----------------------------------------------------------
+    1 |      0.13218      0.11542      0.10644      0.08478
+    2 |      0.11542      0.16803      0.12308      0.10572
+    3 |      0.10644      0.12308      0.16129      0.11696
+    4 |      0.08478      0.10572      0.11696      0.14402
+     [PASS] built Z-bus = inv(Ybus)
+
+=== 2. Each type of modification ===
+  Type 1: new bus 5 connected to the reference through Zb = j0.3.
+     [PASS] add [5 0]
+  Type 2: new bus 6 connected to existing bus 5 through Zb = j0.1.
+     [PASS] add [6 5]
+  Type 3: existing bus 6 connected to the reference through Zb = j0.4.
+     [PASS] add [6 0]
+  Type 4: branch Zb = j0.2 added between existing buses 2 and 6.
+     [PASS] add [2 6]
+  Type 4 (removal): branch 2-6 with Zb = j0.2 removed by adding -Zb in parallel.
+     [PASS] remove [2 6]
+     [PASS] removing 2-6 restores previous Z-bus
+  Type 4: branch 1-2 changed from j0.1 to j0.05, done by adding Zx = Zold*Znew/(Zold-Znew) = j0.1 in parallel.
+     [PASS] change [1 2]
+  Type 2: new bus 7 connected to existing bus 3 through Zb = j0.1.
+     [PASS] add [7 3]
+  Branch 3-7 (Zb = j0.1) was the only path to the reference for bus(es) 7.
+     Removing it isolates them, so their rows/columns were deleted from the Z-bus.
+     [PASS] remove [3 7]
+     [PASS] bus 7 dropped
+  Type 3 (removal): branch 4-ref with Zb = j0.25 removed by adding -Zb in parallel.
+     Type 4 (removal): branch 3-4 with Zb = j0.1 removed by adding -Zb in parallel.
+     Branch 2-4 (Zb = j0.25) was the only path to the reference for bus(es) 4.
+     Removing it isolates them, so their rows/columns were deleted from the Z-bus.
+     [PASS] delbus 4
+     [PASS] bus 4 removed
+
+Z-bus after all changes  (5 x 5)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            5            6
+------------------------------------------------------------------------
+    1 |      0.20000      0.20000      0.20000      0.00000      0.00000
+    2 |      0.20000      0.24375      0.21875      0.00000      0.00000
+    3 |      0.20000      0.21875      0.29375      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.15000      0.20000
+
+=== 3. Isolating a whole group of buses ===
+  Type 2: new bus 8 connected to existing bus 3 through Zb = j0.1.
+     [PASS] add [8 3]
+  Type 2: new bus 9 connected to existing bus 8 through Zb = j0.2.
+     [PASS] add [9 8]
+  Branch 8-3 (Zb = j0.1) was the only path to the reference for bus(es) [8 9].
+     Removing it isolates them, so their rows/columns were deleted from the Z-bus.
+     [PASS] remove [8 3]
+     [PASS] buses 8 and 9 dropped
+  Type 1: new bus 10 connected to the reference through Zb = j0.3.
+     [PASS] add [10 0]
+  Type 2: new bus 11 connected to existing bus 10 through Zb = j0.1.
+     [PASS] add [11 10]
+  Branch 10-ref (Zb = j0.3) was the only path to the reference for bus(es) [10 11].
+     Removing it isolates them, so their rows/columns were deleted from the Z-bus.
+     [PASS] remove [0 10]
+     [PASS] buses 10 and 11 dropped
+
+=== 4. Z-bus entered directly (topology unknown) ===
+     [PASS] remove 1-2 using the matrix only
+     [PASS] change 3-4 using the matrix only
+     [PASS] radial bus found from the matrix only
+
+=== 5. Random 60-bus systems, 300 random modifications ===
+  max |Zbus - inv(Ybus)| over all random changes = 4.37e-15
+
+==== 25 checks passed, 0 failed ====

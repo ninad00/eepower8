@@ -1,0 +1,236 @@
+﻿
+==================================================================
+   Z-BUS MATRIX PORTAL  -  modification of an N-bus power system
+==================================================================
+
+How do you want to insert the network?
+   1. Enter the Z-bus matrix of an N-bus system
+   2. Enter branch (line) data and build the Z-bus
+   3. Use the built-in 4-bus example
+Choice: 3
+
+Built-in example (reactances in p.u.):
+
+Branch list (7 branches, 0 = reference):
+    No.   From     To   Impedance Zb
+      1    ref      1   j0.2
+      2    ref      4   j0.25
+      3      1      2   j0.1
+      4      1      3   j0.15
+      5      2      3   j0.2
+      6      3      4   j0.1
+      7      2      4   j0.25
+
+Z-bus building algorithm:
+   1. Branch 1 (ref-1): Type 1: new bus 1 connected to the reference through Zb = j0.2.
+   2. Branch 2 (ref-4): Type 1: new bus 4 connected to the reference through Zb = j0.25.
+   3. Branch 3 (1-2): Type 2: new bus 2 connected to existing bus 1 through Zb = j0.1.
+   4. Branch 4 (1-3): Type 2: new bus 3 connected to existing bus 1 through Zb = j0.15.
+   5. Branch 5 (2-3): Type 4: branch Zb = j0.2 added between existing buses 2 and 3.
+   6. Branch 6 (3-4): Type 4: branch Zb = j0.1 added between existing buses 3 and 4.
+   7. Branch 7 (2-4): Type 4: branch Zb = j0.25 added between existing buses 2 and 4.
+
+Initial Z-bus matrix  (4 x 4)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4
+-----------------------------------------------------------
+    1 |      0.13218      0.11542      0.10644      0.08478
+    2 |      0.11542      0.16803      0.12308      0.10572
+    3 |      0.10644      0.12308      0.16129      0.11696
+    4 |      0.08478      0.10572      0.11696      0.14402
+
+Commands (number or text; bus 0 = reference):
+   1  add p q Zb       add a branch / new bus  (Type 1-4 found automatically)
+   2  remove p q [Zb]  remove a branch (line outage)
+   3  change p q Znew  change the impedance of a branch
+   4  delbus k         remove bus k together with its branches
+   5  show             display the present Z-bus
+   6  branches         list the branches
+   7  verify           check Z-bus against inv(Ybus)
+   8  undo             undo the last change
+   9  save             save Z-bus to zbus_result.mat / .txt
+   0  exit
+
+Zbus> add 5 0 0.3j
+
+  Change identified -> Type 1: new bus 5 connected to the reference through Zb = j0.3.
+
+Modified Z-bus matrix  (5 x 5)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5
+------------------------------------------------------------------------
+    1 |      0.13218      0.11542      0.10644      0.08478      0.00000
+    2 |      0.11542      0.16803      0.12308      0.10572      0.00000
+    3 |      0.10644      0.12308      0.16129      0.11696      0.00000
+    4 |      0.08478      0.10572      0.11696      0.14402      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.30000
+
+Zbus> 1
+  From bus p (0 = reference): 6
+  To bus q   (0 = reference): 5
+  Branch impedance Zb (e.g. 0.1+0.25j): 0.1j
+
+  Change identified -> Type 2: new bus 6 connected to existing bus 5 through Zb = j0.1.
+
+Modified Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13218      0.11542      0.10644      0.08478      0.00000      0.00000
+    2 |      0.11542      0.16803      0.12308      0.10572      0.00000      0.00000
+    3 |      0.10644      0.12308      0.16129      0.11696      0.00000      0.00000
+    4 |      0.08478      0.10572      0.11696      0.14402      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.30000      0.30000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.30000      0.40000
+
+Zbus> add 6 0 0.4j
+
+  Change identified -> Type 3: existing bus 6 connected to the reference through Zb = j0.4.
+
+Modified Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13218      0.11542      0.10644      0.08478      0.00000      0.00000
+    2 |      0.11542      0.16803      0.12308      0.10572      0.00000      0.00000
+    3 |      0.10644      0.12308      0.16129      0.11696      0.00000      0.00000
+    4 |      0.08478      0.10572      0.11696      0.14402      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Zbus> add 2 6 0.2j
+
+  Change identified -> Type 4: branch Zb = j0.2 added between existing buses 2 and 6.
+
+Modified Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.10872      0.08128      0.08142      0.06330      0.03048      0.04064
+    2 |      0.08128      0.11832      0.08668      0.07445      0.04437      0.05916
+    3 |      0.08142      0.08668      0.13462      0.09405      0.03250      0.04334
+    4 |      0.06330      0.07445      0.09405      0.12435      0.02792      0.03722
+    5 |      0.03048      0.04437      0.03250      0.02792      0.14789      0.09719
+    6 |      0.04064      0.05916      0.04334      0.03722      0.09719      0.12958
+
+Zbus> remove 2 6
+
+  Change identified -> Type 4 (removal): branch 2-6 with Zb = j0.2 removed by adding -Zb in parallel.
+
+Modified Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13218      0.11542      0.10644      0.08478      0.00000      0.00000
+    2 |      0.11542      0.16803      0.12308      0.10572      0.00000      0.00000
+    3 |      0.10644      0.12308      0.16129      0.11696      0.00000      0.00000
+    4 |      0.08478      0.10572      0.11696      0.14402      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Zbus> change 1 2 0.05j
+
+  Change identified -> Type 4: branch 1-2 changed from j0.1 to j0.05, done by adding Zx = Zold*Znew/(Zold-Znew) = j0.1 in parallel.
+
+Modified Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13052      0.12063      0.10808      0.08685      0.00000      0.00000
+    2 |      0.12063      0.15169      0.11791      0.09922      0.00000      0.00000
+    3 |      0.10808      0.11791      0.15965      0.11490      0.00000      0.00000
+    4 |      0.08685      0.09922      0.11490      0.14144      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Zbus> add 7 3 0.1j
+
+  Change identified -> Type 2: new bus 7 connected to existing bus 3 through Zb = j0.1.
+
+Modified Z-bus matrix  (7 x 7)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6            7
+--------------------------------------------------------------------------------------------------
+    1 |      0.13052      0.12063      0.10808      0.08685      0.00000      0.00000      0.10808
+    2 |      0.12063      0.15169      0.11791      0.09922      0.00000      0.00000      0.11791
+    3 |      0.10808      0.11791      0.15965      0.11490      0.00000      0.00000      0.15965
+    4 |      0.08685      0.09922      0.11490      0.14144      0.00000      0.00000      0.11490
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000      0.00000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000      0.00000
+    7 |      0.10808      0.11791      0.15965      0.11490      0.00000      0.00000      0.25965
+
+Zbus> remove 3 7
+
+  Change identified -> Branch 3-7 (Zb = j0.1) was the only path to the reference for bus(es) 7.
+     Removing it isolates them, so their rows/columns were deleted from the Z-bus.
+
+Modified Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13052      0.12063      0.10808      0.08685      0.00000      0.00000
+    2 |      0.12063      0.15169      0.11791      0.09922      0.00000      0.00000
+    3 |      0.10808      0.11791      0.15965      0.11490      0.00000      0.00000
+    4 |      0.08685      0.09922      0.11490      0.14144      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Zbus> delbus 4
+
+  Change identified -> Type 3 (removal): branch 4-ref with Zb = j0.25 removed by adding -Zb in parallel.
+     Type 4 (removal): branch 3-4 with Zb = j0.1 removed by adding -Zb in parallel.
+     Branch 2-4 (Zb = j0.25) was the only path to the reference for bus(es) 4.
+     Removing it isolates them, so their rows/columns were deleted from the Z-bus.
+
+Modified Z-bus matrix  (5 x 5)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            5            6
+------------------------------------------------------------------------
+    1 |      0.20000      0.20000      0.20000      0.00000      0.00000
+    2 |      0.20000      0.24375      0.21875      0.00000      0.00000
+    3 |      0.20000      0.21875      0.29375      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Zbus> verify
+  VERIFIED: Z-bus equals inv(Ybus) built from the branch list (max error 2.22e-16).
+
+Zbus> undo
+
+Z-bus after undo  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13052      0.12063      0.10808      0.08685      0.00000      0.00000
+    2 |      0.12063      0.15169      0.11791      0.09922      0.00000      0.00000
+    3 |      0.10808      0.11791      0.15965      0.11490      0.00000      0.00000
+    4 |      0.08685      0.09922      0.11490      0.14144      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Zbus> branches
+
+Branch list (10 branches, 0 = reference):
+    No.   From     To   Impedance Zb
+      1    ref      1   j0.2
+      2    ref      4   j0.25
+      3      1      2   j0.05
+      4      1      3   j0.15
+      5      2      3   j0.2
+      6      3      4   j0.1
+      7      2      4   j0.25
+      8      5    ref   j0.3
+      9      6      5   j0.1
+     10      6    ref   j0.4
+
+Zbus> save
+  Saved zbus_result.mat and zbus_result.txt in C:\eeass
+
+Zbus> foo
+  Unknown command "foo". Type help to see the menu.
+
+Zbus> add 9 10 0.1j
+  ERROR: Neither bus 9 nor bus 10 is in the Z-bus yet. Connect one of them to the network or to the reference first.
+
+Zbus> exit
+
+Final Z-bus matrix  (6 x 6)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4            5            6
+-------------------------------------------------------------------------------------
+    1 |      0.13052      0.12063      0.10808      0.08685      0.00000      0.00000
+    2 |      0.12063      0.15169      0.11791      0.09922      0.00000      0.00000
+    3 |      0.10808      0.11791      0.15965      0.11490      0.00000      0.00000
+    4 |      0.08685      0.09922      0.11490      0.14144      0.00000      0.00000
+    5 |      0.00000      0.00000      0.00000      0.00000      0.18750      0.15000
+    6 |      0.00000      0.00000      0.00000      0.00000      0.15000      0.20000
+
+Goodbye.

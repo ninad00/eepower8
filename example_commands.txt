@@ -1,0 +1,20 @@
+3
+add 5 0 0.3j
+1
+6
+5
+0.1j
+add 6 0 0.4j
+add 2 6 0.2j
+remove 2 6
+change 1 2 0.05j
+add 7 3 0.1j
+remove 3 7
+delbus 4
+verify
+undo
+branches
+save
+foo
+add 9 10 0.1j
+exit
