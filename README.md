@@ -18,8 +18,8 @@ Plain MATLAB, no toolboxes needed (tested in MATLAB R2026b).
 | `zbus_verify.m`   | Checks the Z-bus against `inv(Ybus)` |
 | `zfmt.m`          | Formats an impedance as text |
 | `zbus_demo.m`     | Self-test: every kind of change, plus 300 random changes on 60-bus systems |
-| `zbus_stability_examples.m` | Lecture examples on stability and the equal area criterion, checked against the slides (separate from the portal) |
-| `stability_examples_output.txt`, `eac_example_b.png`, `eac_example_c.png` | Output and plots of `zbus_stability_examples` (25 checks passed) |
+| `zbus_fault_examples.m` | Fault-analysis lecture examples (9–23 Oct), solved with the Z-bus program and checked against the slides (separate from the portal) |
+| `fault_examples_output.txt` | Output of `zbus_fault_examples` (90 checks passed, 0 failed) |
 | `example_commands.txt` | A recorded session: answers and commands, one per line |
 | `sample_run.txt`  | Output of `zbus_portal('example_commands.txt')` |
 | `selftest_output.txt` | Output of `zbus_demo` (25 checks passed, 0 failed) |
@@ -95,40 +95,37 @@ Branches are assumed to have no mutual coupling.
 This builds the example, applies every type of change and checks each result
 against `inv(Ybus)`. It then runs 300 random changes on random 60-bus networks.
 
-## Stability examples (separate from the portal)
+## Fault-analysis examples (separate from the portal)
 
 ```matlab
->> zbus_stability_examples
+>> zbus_fault_examples
 ```
 
-`zbus_stability_examples.m` works through the EE 315 lecture examples from 27–30 Oct
-(machine dynamics, swing equation, equal area criterion, problem practice). It checks
-each result against the answer on the slide.
+`zbus_fault_examples.m` works through the EE 315 fault-analysis examples from 9–23 Oct.
+It solves each one with the Z-bus program and checks every answer against the slide
+(90 checks).
 
-| Example | What is checked | Slide answer |
-|---------|-----------------|--------------|
-| A: 100 MVA, H = 8 turbogenerator   | stored energy, rotor acceleration | 800 MJ, 337.5 elect deg/s² |
-| B: fault on one of two parallel lines (Problem practice, Ex. 1) | X_I, Pmax_I/II/III, δ0, δmax, δcr | 0.522 pu, 2.3 / 0 / 1.5, 25.8°, 2.41 rad, 55.8° |
-| C: Pmax 2.0 / 0.5 / 1.5 pu (Problem practice, Ex. 2) | δ0, δmax, cos δcr, δcr | 0.523 rad, 2.41 rad, 0.337, 70.3° |
+| Example | Slides | How the Z-bus program is used | Slide answers checked |
+|---------|--------|-------------------------------|-----------------------|
+| A | 14 Oct, sequence components | – (sequence transformation only) | V0 = 27.03∠−79.32°, V1 = 85.68∠21.83°, V2 = 26.01∠−11.78° kV; balanced set; 10∠30° set |
+| B | 13 Oct, Ex. 4 | Z-bus built line by line (types 1, 1, 2, 4 found automatically), then line 1–3 **removed** | final Z-bus to 6 decimals, P = 1.85, P = −0.033784, matrix after removal |
+| C | 13 Oct, Ex. 5 | 4-bus Z-bus; three-phase fault on bus 4 using I_f = V_r/(Z_rr+Z_f) and V_i = V_i − Z_ir·I_f (9 Oct) | Z-bus, I_f = −j7.375, bus voltages, line currents |
+| D | 13 Oct, Ex. 1 | radial network with **complex** impedances; Thevenin impedance = Z_FF | Z_th = 1.674 + j4.82, I_sc = 1715 A, 11 kV bus = 9.68 kV |
+| E | 13 Oct, Ex. 2 | generator + 3 motors; breaker current by **removing** motor 3's branch; interrupting current by **changing** motor reactances X″d → X′d | −j4.22, −j3.42 pu (7479.5 A), 11967 A, 3.1515 pu (7581 A) |
+| F | 13 Oct, Ex. 3 | loaded system: prefault current + pure-fault change from the Z-bus (superposition) | I″g = 0.6226 − j1.6746, I″m = −0.6226 − j6.8906, I_f = −j8.5653 pu (−j11,239 A) |
+| G | 23 Oct (and 16 Oct formulas) | positive, negative and zero sequence Z-buses; LG fault on bus 2; generator currents and voltages from Z_ir | Z1 = j0.157, Z0 = j0.051, I_f = 8.22 pu (5392.9 A), Vb, Vc at F, G1 and G2 currents and voltages |
 
-**How Example B uses the Z-bus program.** The prefault network is built from branch
-data. The fault at P is a **Type 3** change with Zb = 0 (bus grounded through zero
-impedance). Clearing the fault is the **removal** of the j0.4 line. For each network,
-the program reduces the Z-bus to the generator EMF bus and the infinite bus and inverts
-it. That gives the transfer reactance, and then Pmax = |E'||V|/X.
-
-Example B also adds a j1.0 shunt at the generator bus and at the infinite bus, so that
-a Z-bus exists at all. These shunts do not change the answer: shunts at the two buses
-that are kept only change the diagonal of the reduced Ybus, and the transfer reactance
-comes from the off-diagonal term.
-
-**Swing-equation check.** Examples B and C also solve the swing equation numerically
-(RK4) with H = 5 MJ/MVA. H is **assumed**, because the problems don't give it. The
-checks are:
-- clearing 1° before δcr is stable, and 1° after is unstable;
-- the critical clearing time found by simulation matches the closed-form formula
-  `t_cr = sqrt(2H(δcr-δ0)/(πf Pm))`, which applies when Pe = 0 during the fault;
-- the rotor angle at that time equals the δcr from the equal area criterion.
-
-The stable/unstable result for a given clearing angle does not depend on H. Only the
-times do.
+Notes on the slide values:
+- **Rounding.** The slides round intermediate values, so each check uses a tolerance
+  that matches the slide's rounding. For example, in G the slide rounds Z1 and Z0 to
+  three decimals before dividing, and gets about 0.4 % more current than the exact
+  calculation.
+- **Example C line currents.** The rounded slide values I13 = j0.182 and I23 = −j0.177
+  don't quite satisfy KCL at bus 3, which has no load. The exact values do: I13 = −I23 =
+  j0.1806.
+- **Example G, G1 current.** The slide prints Ib = 2.40∠270° for G1, but
+  Ib = a²I1 + aI2 = −Ia = 2.40∠90°. The magnitudes agree.
+- **LL and LLG faults.** Example G also applies the LL and LLG fault formulas from
+  16 Oct at the same fault point. The slides give no answers for these, so the program
+  checks their boundary conditions instead: Ia = 0, Ib = −Ic and Vb = Vc for LL;
+  Vb = Vc = 0 for LLG.

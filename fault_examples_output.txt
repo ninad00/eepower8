@@ -1,0 +1,205 @@
+
+=== Example A (14 Oct, Sequence components): symmetrical components ===
+  Va = 110 /_ 0, Vb = 88 /_ -100, Vc = 80 /_ 175 kV  ->
+     V0 = 27.0315 /_ 280.68 deg kV
+     V1 = 85.6771 /_ 21.84 deg kV
+     V2 = 26.0142 /_ 348.22 deg kV
+     [PASS] |V0| = 27.03 kV   (got 27.0315)
+     [PASS] angle V0 = -79.32 deg   (got 280.676)
+     [PASS] |V1| = 85.68 kV   (got 85.6771)
+     [PASS] angle V1 = 21.83 deg   (got 21.8425)
+     [PASS] |V2| = 26.01 kV   (got 26.0142)
+     [PASS] angle V2 = -11.78 deg   (got 348.215)
+  Balanced Ia = 100 /_ 0, Ib = 100 /_ -120, Ic = 100 /_ 120 A -> I0 = 3.7e-14, I1 = 100.0000 /_ 0.00 deg, I2 = 2.37e-14 A
+     [PASS] balanced set: I0 = 0, I1 = 100 /_ 0, I2 = 0
+  I0 = I1 = I2 = 10 /_ 30 A -> Ia = 30.0000 /_ 30.00 deg, Ib = 3.66e-15, Ic = 3.55e-15 A
+     [PASS] Ia = 30 /_ 30 A, Ib = Ic = 0
+
+=== Example B (13 Oct, Example 4): build Z-bus step by step, then remove line 1-3 ===
+  Line 1: Type 1: new bus 1 connected to the reference through Zb = 0.6.
+  Line 2: Type 1: new bus 2 connected to the reference through Zb = 0.5.
+  Line 3: Type 2: new bus 3 connected to existing bus 2 through Zb = 0.5.
+  Line 4: Type 4: branch Zb = 0.25 added between existing buses 1 and 3.
+
+  Z-bus after step 3  (3 x 3)
+  Bus |            1            2            3
+----------------------------------------------
+    1 |      0.60000      0.00000      0.00000
+    2 |      0.00000      0.50000      0.50000
+    3 |      0.00000      0.50000      1.00000
+
+  Final Z-bus  (3 x 3)
+  Bus |            1            2            3
+----------------------------------------------
+    1 |      0.40541      0.16216      0.32432
+    2 |      0.16216      0.36486      0.22973
+    3 |      0.32432      0.22973      0.45946
+     [PASS] modification types found: 1, 1, 2, 4
+     [PASS] step-3 Z-bus = [0.6 0 0; 0 0.5 0.5; 0 0.5 1.0]
+     [PASS] Type 4 denominator P = 1.85   (got 1.85)
+     [PASS] final Z-bus = slide matrix (6 decimals)
+     [PASS] final Z-bus = inv(Ybus)
+
+  Remove line 1-3: Type 4 (removal): branch 1-3 with Zb = 0.25 removed by adding -Zb in parallel.
+
+  Z-bus with line 1-3 removed  (3 x 3)
+  Bus |            1            2            3
+----------------------------------------------
+    1 |      0.60000      0.00000      0.00000
+    2 |      0.00000      0.50000      0.50000
+    3 |      0.00000      0.50000      1.00000
+     [PASS] removal denominator P = -0.033784   (got -0.0337838)
+     [PASS] after removal Z-bus = [0.6 0 0; 0 0.5 0.5; 0 0.5 1.0]
+
+=== Example C (13 Oct, Example 5): three-phase fault on bus 4 of a 4-bus system ===
+
+  Z-bus  (4 x 4)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4
+-----------------------------------------------------------
+    1 |      0.09031      0.05969      0.07194      0.07806
+    2 |      0.05969      0.09031      0.07806      0.07194
+    3 |      0.07194      0.07806      0.13561      0.07439
+    4 |      0.07806      0.07194      0.07439      0.13561
+     [PASS] Z-bus = slide matrix (4 decimals)
+  I_f = V4/(Z44 + Zf) = 0.0000 -7.3740j pu
+  Bus voltages during the fault: V1 = 0.4244, V2 = 0.4695, V3 = 0.4515, V4 = 0.0000 pu
+     [PASS] I_f = -j7.37463 pu   (got 0.00000 -7.37397j)
+     [PASS] V1 = 0.4248 pu   (got 0.424379)
+     [PASS] V2 = 0.4698 pu   (got 0.469526)
+     [PASS] V3 = 0.4521 pu   (got 0.451467)
+     [PASS] V4 = 0   (got 0)
+     note: slide line currents use voltages rounded to 4 decimals; tolerance = 0.0006/|z|
+     [PASS] line current I13 = j0.182 pu   (got 0.00000 +0.18059j)
+     [PASS] line current I12 = j0.225 pu   (got 0.00000 +0.22573j)
+     [PASS] line current I14 = -j4.248 pu   (got 0.00000 -4.24379j)
+     [PASS] line current I24 = -j3.132 pu   (got 0.00000 -3.13017j)
+     [PASS] line current I23 = -j0.177 pu   (got 0.00000 -0.18059j)
+     note: bus 3 has no load, so I13 + I23 = 0 exactly (the rounded slide values j0.182 and -j0.177 do not quite cancel)
+     [PASS] KCL at bus 3: I13 + I23 = 0   (got 0)
+     [PASS] KCL at bus 4: I14 + I24 = I_f   (got 0.00000 -7.37397j)
+
+=== Example D (13 Oct, Example 1): radial network with complex impedances ===
+  Per unit (100 MVA): G1 j1.5, G2 j1.25, T1 j1, T2 j1.6, line 0.7438 +0.9917j, cable 0.9298 +0.5510j
+  Thevenin impedance at F = Z55 = 1.6736 +4.8245j = 5.1065 /_ 70.87 deg pu
+  I_sc = 0.1958 pu = 1713 A;  11 kV bus voltage = 0.8750 pu = 9.62 kV
+     [PASS] Z_th = 1.674 + j4.82 pu   (got 1.67355 +4.82452j)
+     [PASS] |Z_th| = 5.1 pu   (got 5.10654)
+     [PASS] angle Z_th = 70.8 deg   (got 70.8691)
+     [PASS] I_sc = 0.196 pu   (got 0.195827)
+     [PASS] I_sc = 1715 A   (got 1713.04)
+     [PASS] 11 kV bus voltage = 0.88 pu (slide rounds 0.875)   (got 0.87495)
+     [PASS] 11 kV bus voltage = 9.68 kV   (got 9.62445)
+
+=== Example E (13 Oct, Example 2): generator feeding three motors, fault at F ===
+  Branch 1 (1-ref): Type 1: new bus 1 connected to the reference through Zb = j0.2.
+  Branch 2 (1-2): Type 2: new bus 2 connected to existing bus 1 through Zb = j0.1.
+  Branch 3 (2-3): Type 2: new bus 3 connected to existing bus 2 through Zb = j0.15.
+  Branch 4 (3-4): Type 2: new bus 4 connected to existing bus 3 through Zb = j0.1.
+  Branch 5 (4-ref): Type 3: existing bus 4 connected to the reference through Zb = j1.25.
+  Branch 6 (4-ref): Type 3: existing bus 4 connected to the reference through Zb = j1.25.
+  Branch 7 (4-5): Type 2: new bus 5 connected to existing bus 4 through Zb = 0.
+  Branch 8 (5-ref): Type 3: existing bus 5 connected to the reference through Zb = j1.25.
+  (a) fault current            = 0.0000 -4.2182j pu = 9225 A
+     [PASS] (a) subtransient fault current = -j4.22 pu   (got 0.00000 -4.21818j)
+  (b) Type 3 (removal): branch 5-ref with Zb = j1.25 removed by adding -Zb in parallel.
+      breaker current           = 0.0000 -3.4182j pu = 7475.3 A
+     [PASS] (b) breaker current = -j3.42 pu   (got 0.00000 -3.41818j)
+     [PASS] (b) breaker current = 7479.5 A   (got 7475.33)
+  (c) momentary current = 1.6 x 7475.3 = 11961 A
+     [PASS] (c) momentary current = 11967 A   (got 11960.5)
+  (d) Type 3: branch 4-ref changed from j1.25 to j1.5, done by adding Zx = Zold*Znew/(Zold-Znew) = -j7.5 in parallel.
+      Type 3: branch 4-ref changed from j1.25 to j1.5, done by adding Zx = Zold*Znew/(Zold-Znew) = -j7.5 in parallel.
+      symmetrical current = 3.1515 pu;  x 1.1 (5 cycles) = 7581 A
+     [PASS] (d) symmetrical current = 3.1515 pu   (got 3.15152)
+     [PASS] (d) current to be interrupted = 7581 A   (got 7581.37)
+
+=== Example F (13 Oct, Example 3): fault on a loaded system (superposition) ===
+  V0 = 0.9636 pu, prefault I0 = 0.6226 +0.4670j pu
+  I_f = 0.0000 -8.5657j pu,  I''g = 0.6226 -1.6744j pu,  I''m = -0.6226 -6.8912j pu
+  In amperes: I''g = 817.0 -2197.1j A, I''m = -817.0 -9042.4j A, I_f = 0.0 -11239.5j A
+     [PASS] generator current = 0.6226 - j1.6746 pu   (got 0.62264 -1.67443j)
+     [PASS] motor current = -0.6226 - j6.8906 pu   (got -0.62264 -6.89122j)
+     [PASS] fault current = -j8.5653 pu   (got 0.00000 -8.56566j)
+     [PASS] I_f = I''g + I''m   (got 0.00000 -8.56566j)
+     [PASS] fault current = -j11,239 A   (got 0.00000 -11239.50937j)
+
+=== Example G (23 Oct): single line-to-ground fault on bus 2 (sequence Z-buses) ===
+
+  Positive (and negative) sequence Z-bus  (4 x 4)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4
+-----------------------------------------------------------
+    1 |      0.15079      0.12698      0.10714      0.07937
+    2 |      0.12698      0.15746      0.13286      0.09841
+    3 |      0.10714      0.13286      0.15429      0.11429
+    4 |      0.07937      0.09841      0.11429      0.13651
+
+  Zero sequence Z-bus  (4 x 4)   (all elements are imaginary:  Z = j x [values below])
+  Bus |            1            2            3            4
+-----------------------------------------------------------
+    1 |      0.05000      0.00000      0.00000      0.00000
+    2 |      0.00000      0.05143      0.03000      0.02000
+    3 |      0.00000      0.03000      0.10500      0.07000
+    4 |      0.00000      0.02000      0.07000      0.09333
+  Thevenin impedances at F: Z1 = Z2 = 0.0000 +0.1575j, Z0 = 0.0000 +0.0514j pu
+     [PASS] Z1 = Z2 = j0.157 pu   (got 0.00000 +0.15746j)
+     [PASS] Z0 = j0.051 pu   (got 0.00000 +0.05143j)
+  (a) Ia0 = Ia1 = Ia2 = 0.0000 -2.7296j pu;  Ia = 0.0000 -8.1889j pu = 5372.6 A;  Ib = 9.2e-16, Ic = 9.2e-16
+     note: the slide rounds Z1, Z2, Z0 to j0.157, j0.157, j0.051 first; the exact values give ~0.4% less current
+     [PASS] (a) Ia1 = -j2.74 pu   (got 0.00000 -2.72964j)
+     [PASS] (a) fault current Ia = -j8.22 pu   (got 0.00000 -8.18891j)
+     [PASS] (a) fault current = 5392.9 A   (got 5372.58)
+     [PASS] (a) Ib = Ic = 0
+  (b) Va1 = 0.5702, Va2 = -0.4298, Va0 = -0.1404 pu
+      Va = 1.1e-16, Vb = 0.8913 /_ 256.33 deg, Vc = 0.8913 /_ 103.67 deg pu;  |Vb| = 113.20 kV
+     [PASS] (b) Va1 = 0.57 pu   (got 0.570191)
+     [PASS] (b) Va2 = -0.43 pu   (got -0.429809)
+     [PASS] (b) Va0 = -0.14 pu   (got -0.140381)
+     [PASS] (b) Va = 0 at the fault   (got 1.11022e-16)
+     [PASS] (b) |Vb| = |Vc| = 0.891 pu
+     [PASS] (b) angle Vb = 256.37 deg   (got 256.334)
+     [PASS] (b) angle Vc = 103.63 deg   (got 103.666)
+     [PASS] (b) |Vb| = 113.18 kV   (got 113.205)
+  (c) G2: I0 = 0.0000 -0.3899j, I1 = 0.0000 -1.3432j, I2 = 0.0000 -1.3432j pu
+      Ia = 3.0763 /_ 270.00 deg, Ib = 0.9532 /_ 90.00 deg, Ic = 0.9532 /_ 90.00 deg pu  (Ia = 40365 A)
+      Va = 0.4081 /_ 0.00 deg, Vb = 0.9120 /_ 251.73 deg, Vc = 0.9120 /_ 108.27 deg pu  (2.59, 5.79, 5.79 kV)
+     [PASS] (c) G2 Ia1 = Ia2 = -j1.35 pu   (got 0.00000 -1.34315j)
+     [PASS] (c) G2 Ia0 = -j0.39 pu   (got 0.00000 -0.38995j)
+     [PASS] (c) G2 |Ia| = 3.09 pu   (got 3.07626)
+     [PASS] (c) G2 angle Ia = 270 deg   (got 270)
+     [PASS] (c) G2 |Ib| = |Ic| = 0.96 pu
+     [PASS] (c) G2 angle Ib = 90 deg   (got 90)
+     [PASS] (c) G2 Ia = 40545.73 A   (got 40365.4)
+     [PASS] (c) G2 Va0 = -0.0546 pu   (got -0.0545927)
+     [PASS] (c) G2 |Va| = 0.405 pu   (got 0.408146)
+     [PASS] (c) G2 |Vb| = |Vc| = 0.91 pu
+     [PASS] (c) G2 Va = 2.57 kV, Vb = Vc = 5.78 kV
+  (c) G1: I1 = 1.3865 /_ 240.00 deg, I2 = 1.3865 /_ 300.00 deg pu (after the 30 deg shift), I0 = 0
+      Ia = 2.4015 /_ 270.00 deg, Ib = 2.4015 /_ 90.00 deg, Ic = 6.7e-16 pu  (Ia = 31511 A)
+      Va = 0.5662 /_ 297.98 deg, Vb = 0.5662 /_ 242.02 deg, Vc = 1.0000 /_ 90.00 deg pu  (3.60, 3.60, 6.35 kV)
+     note: the slide prints Ib = 2.40 /_ 270 for G1, but Ib = a^2 I1 + a I2 = -Ia = 2.40 /_ 90 (sign slip on the slide); magnitudes agree
+     [PASS] (c) G1 Ia1 = -j1.39 pu (before shift)   (got 0.00000 -1.38648j)
+     [PASS] (c) G1 Ia1 angle 240 deg after shift   (got 240)
+     [PASS] (c) G1 Ia2 angle 300 deg after shift   (got 300)
+     [PASS] (c) G1 |Ia| = |Ib| = 2.40 pu
+     [PASS] (c) G1 angle Ia = 270 deg   (got 270)
+     [PASS] (c) G1 Ic = 0   (got 0)
+     [PASS] (c) G1 Ia = 31491.81 A   (got 31511)
+     [PASS] (c) G1 Va1 = 0.6525 pu   (got 0.65338)
+     [PASS] (c) G1 Va2 = -0.3475 pu   (got -0.34662)
+     [PASS] (c) G1 |Va| = |Vb| = 0.566 pu, |Vc| = 1.0 pu
+     [PASS] (c) G1 angle Va = 298 deg   (got 297.983)
+     [PASS] (c) G1 angle Vb = 242 deg   (got 242.017)
+     [PASS] (c) G1 angle Vc = 90 deg   (got 90)
+     [PASS] (c) G1 Va = Vb = 3.59 kV, Vc = 6.35 kV
+
+  Same fault point, other fault types (16 Oct formulas, Zf = 0):
+     LL  (b-c): Ib = 5.5000 /_ 180.00 deg pu, Ic = 5.5000 /_ 360.00 deg pu
+     [PASS] LL: Ia = 0 and Ib = -Ic
+     [PASS] LL: Ib = -j*sqrt(3)*E/(Z1+Z2)   (got -5.49996)
+     [PASS] LL: Vb = Vc at the fault   (got -0.5)
+     LLG (b-c-g): Ib = 7.9657 /_ 133.67 deg, Ic = 7.9657 /_ 46.33 deg, ground current 3I0 = 11.5244 /_ 90.00 deg pu
+     [PASS] LLG: Ia = 0   (got 0)
+     [PASS] LLG: Vb = Vc = 0 at the fault
+     LLL: I_f = 0.0000 -6.3508j pu = 4167 A
+
+==== 90 checks passed, 0 failed ====
